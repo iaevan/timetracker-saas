@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Daily Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0f14;
+    --bg2:#0f141b;
+    --surf:#141b24;
+    --surf2:#1a222d;
+    --line:#2a3542;
+    --line2:#38465a;
+    --text:#eef2f7;
+    --mut:#c2ccd8;
+    --mut2:#a7b3c1;
+    --disp:"Mona Sans","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono:"Mona Sans","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --body:"Mona Sans","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(900px 500px at 85% -10%, #131c28 0%, transparent 60%),
+      radial-gradient(700px 400px at -5% 110%, #14121f 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    font-synthesis:none;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    line-height:1.55;
+    min-height:100%;
+  }
+  /* numbers stay aligned without a monospace face */
+  .clock,.midnote,.hero .rng,.hero .cd,.up .t,.up .in,.railcap,.nowmark .bub,.tip .tm,.row .rt,.badge{font-variant-numeric:tabular-nums}
+  .wrap{max-width:1120px;margin:0 auto;padding:26px 22px 90px}
+
+  /* ---------- header ---------- */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+  .brand{display:flex;flex-direction:column;gap:2px}
+  .brand h1{
+    font-family:var(--disp);font-weight:600;font-size:clamp(1.5rem,3.4vw,2.15rem);
+    letter-spacing:-.01em;line-height:1;
+    display:flex;align-items:center;gap:11px;
+  }
+  .brand h1 .dot{width:11px;height:11px;border-radius:50%;background:var(--text);box-shadow:0 0 14px 2px currentColor;flex:none}
+  .brand p{font-size:.84rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:6px}
+
+  .tabs{display:inline-flex;background:var(--surf);border:1px solid var(--line);border-radius:11px;padding:4px}
+  .tabs button{
+    font-size:.92rem;font-weight:600;letter-spacing:.02em;
+    color:var(--mut);background:transparent;border:0;cursor:pointer;
+    padding:10px 18px;border-radius:8px;transition:.18s;
+  }
+  .tabs button:hover{color:var(--text)}
+  .tabs button.on{background:var(--surf2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line2)}
+  .tabs button:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
+
+  .panel{display:none}
+  .panel.on{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ---------- now: top strip ---------- */
+  .daymeta{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .daymeta .l{display:flex;flex-direction:column;gap:3px}
+  .daymeta .ey{font-size:.82rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  .daymeta .dn{font-family:var(--disp);font-weight:700;font-size:1.6rem;letter-spacing:-.01em;line-height:1.08}
+  .daymeta .dn .tag{font-weight:500;font-size:.92rem;color:var(--mut);margin-left:10px;letter-spacing:0;text-transform:none}
+  .clock{font-weight:600;font-size:1.1rem;color:var(--text);text-align:right}
+  .clock .sub{display:block;font-size:.82rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+  .midnote{font-size:.86rem;font-weight:600;color:#f5b842;letter-spacing:.01em;margin-top:4px}
+
+  /* ---------- the day line ---------- */
+  .rail{position:relative;margin:30px 0 8px}
+  .bar{position:relative;display:flex;height:46px;border-radius:11px;overflow:hidden;background:#10161e;box-shadow:inset 0 0 0 1px var(--line)}
+  .seg{height:100%;position:relative;transition:filter .18s, box-shadow .18s}
+  .seg::after{content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:rgba(10,14,20,.55)}
+  .seg:last-child::after{display:none}
+  .seg.past{filter:saturate(.5) brightness(.55)}
+  .seg.live{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
+  .seg:hover,.seg:focus-visible{filter:brightness(1.16) saturate(1.08);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.65);cursor:pointer;outline:none;z-index:2}
+  .nowmark{position:absolute;top:-6px;bottom:-6px;width:2px;background:#fff;border-radius:2px;transition:left .9s linear;box-shadow:0 0 10px 1px rgba(255,255,255,.7);pointer-events:none;z-index:4}
+  .nowmark .bub{position:absolute;top:-27px;left:50%;transform:translateX(-50%);font-size:.78rem;background:#fff;color:#0c0f14;padding:3px 8px;border-radius:6px;white-space:nowrap;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .nowmark .bub::after{content:"";position:absolute;left:50%;bottom:-3px;transform:translateX(-50%) rotate(45deg);width:6px;height:6px;background:#fff}
+  .railcap{display:flex;justify-content:space-between;font-size:.82rem;font-weight:500;color:var(--mut);margin-top:12px;letter-spacing:.01em}
+  .tip{position:absolute;top:-8px;left:0;transform:translate(-50%,-100%);z-index:10;background:#0b0e13;border:1px solid var(--line2);border-radius:11px;padding:11px 14px;min-width:150px;box-shadow:0 16px 36px -12px rgba(0,0,0,.85);pointer-events:none}
+  .tip[hidden]{display:none}
+  .tip .th{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .tip .sw{width:13px;height:13px;border-radius:3px;flex:none;box-shadow:0 0 8px currentColor}
+  .tip .tk{font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text);font-weight:700}
+  .tip .ac{font-family:var(--disp);font-weight:600;font-size:1.08rem;color:var(--text);line-height:1.2}
+  .tip .tm{font-size:.86rem;font-weight:500;color:var(--mut);margin-top:4px}
+  .tip .arw{position:absolute;bottom:-6px;left:50%;width:11px;height:11px;background:#0b0e13;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);transform:translateX(-50%) rotate(45deg)}
+
+  /* ---------- hero card ---------- */
+  .nowlbl{display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin:24px 0 11px}
+  .nowlbl .pip{width:10px;height:10px;border-radius:50%;background:var(--c,#888);box-shadow:0 0 12px 1px var(--c,#888)}
+  @media (prefers-reduced-motion:no-preference){.nowlbl .pip{animation:pulse 2.1s ease-in-out infinite}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+  .hero{
+    --c:#888;
+    position:relative;background:linear-gradient(180deg,var(--surf) 0%,var(--bg2) 100%);
+    border:1px solid var(--line);border-left:4px solid var(--c);
+    border-radius:16px;padding:24px 24px 20px;overflow:hidden;
+    box-shadow:0 18px 50px -30px var(--c), 0 1px 0 rgba(255,255,255,.02) inset;
+  }
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 180px at 100% 0%,color-mix(in srgb,var(--c) 12%,transparent),transparent 70%);pointer-events:none}
+  .hero .track{position:relative;font-size:.88rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c);margin-bottom:9px}
+  .hero .ttl{position:relative;font-family:var(--disp);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.5rem);letter-spacing:-.015em;line-height:1.06}
+  .hero .det{position:relative;color:var(--mut);font-size:1.05rem;margin-top:9px;max-width:60ch}
+  .hero .room{position:relative;display:inline-flex;align-items:center;gap:6px;margin-top:13px;font-size:.9rem;font-weight:600;color:var(--text);background:color-mix(in srgb,var(--c) 18%,transparent);border:1px solid color-mix(in srgb,var(--c) 50%,transparent);padding:5px 11px;border-radius:8px}
+  .hero .foot{position:relative;display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:20px}
+  .hero .rng{font-size:.98rem;font-weight:500;color:var(--mut)}
+  .hero .cd{font-family:var(--disp);font-weight:600;font-size:1.22rem;color:var(--text)}
+  .hero .cd b{color:var(--c);font-weight:700}
+  .prog{position:relative;height:8px;border-radius:6px;background:#10161e;overflow:hidden;margin-top:15px;box-shadow:inset 0 0 0 1px var(--line)}
+  .prog i{display:block;height:100%;background:var(--c);border-radius:6px;transition:width .9s linear;box-shadow:0 0 12px var(--c)}
+  .hero.sleep{--c:#9aa7b6}
+  .hero.sleep .ttl{color:#dbe2ea}
+
+  /* ---------- up next ---------- */
+  .upttl{font-size:.84rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin:28px 0 13px}
+  .upnext{display:flex;flex-direction:column;gap:9px}
+  .up{
+    display:grid;grid-template-columns:88px 14px 1fr auto;align-items:center;gap:14px;
+    background:var(--surf);border:1px solid var(--line);border-radius:11px;padding:13px 16px;
+  }
+  .up .t{font-size:.92rem;font-weight:600;color:var(--text)}
+  .up .pip{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+  .up .nm b{font-family:var(--disp);font-weight:600;font-size:1.08rem;color:var(--text)}
+  .up .nm span{color:var(--mut);font-size:.92rem;margin-left:9px}
+  .up .in{font-size:.86rem;font-weight:500;color:var(--mut);white-space:nowrap}
+  .up.first{border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+
+  /* ---------- week ---------- */
+  .legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:22px;padding:15px 17px;background:var(--surf);border:1px solid var(--line);border-radius:12px}
+  .legend .lg{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.03em;color:var(--mut);text-transform:uppercase}
+  .legend .sw{width:13px;height:13px;border-radius:3px;background:var(--c)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg,var(--surf) 0%,var(--bg2) 100%);border:1px solid var(--line);border-radius:14px;padding:17px 16px 15px;display:flex;flex-direction:column;gap:2px}
+  .card.today{border-color:#22d3ee;box-shadow:0 0 0 1px #22d3ee, 0 20px 50px -34px #22d3ee}
+  .card .ch{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .card .ch .dd{font-family:var(--disp);font-weight:700;font-size:1.2rem;letter-spacing:-.01em}
+  .card .ch .tg{font-size:.82rem;font-weight:500;color:var(--mut);display:block;margin-top:3px;letter-spacing:0}
+  .badge{font-size:.8rem;letter-spacing:.05em;color:#04222a;background:#22d3ee;padding:3px 9px;border-radius:6px;font-weight:700}
+  .row{display:grid;grid-template-columns:112px 1fr;gap:12px;align-items:start;padding:9px 0;border-left:3px solid var(--c);padding-left:12px;margin-left:1px;transition:.18s}
+  .row+.row{margin-top:2px}
+  .row .rt{font-size:.84rem;font-weight:600;color:var(--mut);padding-top:1px;white-space:nowrap}
+  .row .rb b{font-size:.96rem;font-weight:600;color:var(--text);display:block;line-height:1.3}
+  .row .rb small{color:var(--mut);font-size:.84rem}
+  .row .rm{font-size:.8rem;font-weight:600;color:var(--c);margin-top:3px;display:inline-block}
+  .row.live{background:color-mix(in srgb,var(--c) 12%,transparent);border-radius:0 8px 8px 0}
+  .row.live .rb b::after{content:"● now";font-size:.8rem;color:var(--c);margin-left:9px;vertical-align:middle;letter-spacing:.02em;font-weight:700}
+
+  footer{margin-top:34px;font-size:.84rem;font-weight:500;color:var(--mut);letter-spacing:.01em;text-align:center;line-height:1.7;max-width:70ch;margin-left:auto;margin-right:auto}
+
+  /* respect user motion + contrast preferences */
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important}
+    .nowmark,.prog i,.panel.on,.seg,.tabs button,.row{transition:none !important}
+  }
+  @media (prefers-contrast:more){
+    :root{--text:#ffffff;--mut:#e2e8f0;--mut2:#cbd5e1;--line:#5a6b7d;--line2:#6b7d90}
+    .hero,.up,.card,.tabs,.legend,.tip{border-width:2px}
+    .seg::after{background:rgba(0,0,0,.85)}
+  }
+
+  @media (max-width:560px){
+    .wrap{padding:20px 15px 80px}
+    .up{grid-template-columns:80px 12px 1fr;gap:11px}
+    .up .in{grid-column:3;justify-self:start;margin-top:2px}
+    .daymeta .dn .tag{display:block;margin:4px 0 0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1><span class="dot" id="brandDot"></span>The Daily Line</h1>
+      <p>one focus at a time</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button id="tabNow" class="on" role="tab" aria-selected="true">Now</button>
+      <button id="tabWeek" role="tab" aria-selected="false">Week</button>
+    </div>
+  </header>
+
+  <!-- NOW -->
+  <section class="panel on" id="panelNow" role="tabpanel" aria-label="Now">
+    <div class="daymeta">
+      <div class="l">
+        <span class="ey">Active day</span>
+        <span class="dn" id="dayName">—<span class="tag" id="dayTag"></span></span>
+        <span class="midnote" id="midNote" style="display:none"></span>
+      </div>
+      <div class="clock" id="clock">—<span class="sub" id="clockSub"></span></div>
+    </div>
+
+    <div class="rail" id="rail">
+      <div class="tip" id="barTip" hidden>
+        <div class="th"><span class="sw"></span><span class="tk"></span></div>
+        <div class="ac"></div>
+        <div class="tm"></div>
+        <span class="arw"></span>
+      </div>
+      <div class="bar" id="bar"></div>
+      <div class="railcap"><span id="railStart"></span><span id="railEnd">2:00 AM · hard sleep</span></div>
+    </div>
+
+    <div class="nowlbl" id="nowLbl"><span class="pip"></span><span id="nowLblTxt">Right now</span></div>
+    <div class="hero" id="hero">
+      <div class="track" id="hTrack"></div>
+      <div class="ttl" id="hTtl"></div>
+      <div class="det" id="hDet"></div>
+      <div class="room" id="hRoom" style="display:none"></div>
+      <div class="foot">
+        <span class="rng" id="hRng"></span>
+        <span class="cd" id="hCd"></span>
+      </div>
+      <div class="prog" id="hProgWrap"><i id="hProg"></i></div>
+    </div>
+
+    <div class="upttl">Up next</div>
+    <div class="upnext" id="upNext"></div>
+  </section>
+
+  <!-- WEEK -->
+  <section class="panel" id="panelWeek" role="tabpanel" aria-label="Week">
+    <div class="legend" id="legend"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+"use strict";
+
+/* ---- track categories ---- */
+const CATS = {
+  cto:    {n:"CTO Core",  c:"#f5a623"},
+  spacend:{n:"Spacend",   c:"#f472b6"},
+  ml:     {n:"ML Track",  c:"#22d3ee"},
+  flex:   {n:"Flex Zone", c:"#a78bfa"},
+  class:  {n:"Class",     c:"#60a5fa"},
+  study:  {n:"Study",     c:"#818cf8"},
+  buffer: {n:"Buffer",    c:"#14b8a6"},
+  free:   {n:"Free",      c:"#4ade80"},
+  routine:{n:"Routine",   c:"#94a3b8"},
+  reading:{n:"Reading",   c:"#c4b5fd"},
+  sleep:  {n:"Sleep",     c:"#5f6b7a"},
+};
+
+/* ---- schedule: minutes from midnight; end may exceed 1440 (past midnight) ---- */
+const MON = [
+  {s:570,e:600, cat:"routine", title:"Wake up", detail:"Breakfast · pacing"},
+  {s:600,e:780, cat:"cto", title:"CTO Core", detail:"Technical architecture · developer management"},
+  {s:780,e:870, cat:"spacend", title:"Spacend UI", detail:"High-ticket designs · hand-offs to Asif & Rith"},
+  {s:870,e:1080, cat:"buffer", title:"Buffer", detail:"Commute · meals · gym · Slack check-ins"},
+  {s:1080,e:1170, cat:"class", title:"ECO104", detail:"Lecture", room:"NAC403"},
+  {s:1170,e:1230, cat:"routine", title:"Return commute · dinner", detail:""},
+  {s:1230,e:1380, cat:"ml", title:"ML Track", detail:"Stanford lectures · algorithm coding"},
+  {s:1380,e:1530, cat:"free", title:"Free buffer", detail:"Decompression · time with Rith"},
+  {s:1530,e:1560, cat:"reading", title:"Book wind-down", detail:"Screen cutoff · 30 min"},
+];
+const SCHEDULE = {
+  1: MON,
+  3: MON,
+  2: [
+    {s:570,e:600, cat:"routine", title:"Wake up", detail:"Breakfast"},
+    {s:600,e:780, cat:"spacend", title:"Spacend Dev", detail:"WordPress & Elementor core development"},
+    {s:780,e:1080, cat:"flex", title:"Flex zone", detail:"CTO visits / product shoots · else client work"},
+    {s:1080,e:1230, cat:"buffer", title:"Buffer", detail:"Dinner · gym · errands"},
+    {s:1230,e:1380, cat:"ml", title:"ML Track", detail:"Stanford project execution"},
+    {s:1380,e:1530, cat:"free", title:"Free buffer", detail:"Decompression"},
+    {s:1530,e:1560, cat:"reading", title:"Book wind-down", detail:"Screen cutoff · 30 min"},
+  ],
+  4: [
+    {s:510,e:580, cat:"routine", title:"Wake · commute to NSU", detail:"Quick breakfast"},
+    {s:580,e:670, cat:"class", title:"CSE173 Discrete Math", detail:"Lecture", room:"SAC311"},
+    {s:680,e:770, cat:"class", title:"MAT125 Linear Algebra", detail:"Lecture", room:"NAC314"},
+    {s:780,e:885, cat:"study", title:"Study block", detail:"NSU Library · MAT125 matrices"},
+    {s:885,e:975, cat:"cto", title:"CTO async", detail:"Startup checks · vendor tracking (library desk)"},
+    {s:980,e:1070, cat:"class", title:"EEE154 Drawing Lab", detail:"Lab", room:"LIB608"},
+    {s:1080,e:1170, cat:"class", title:"POL101 Political Economy", detail:"Lecture", room:"NAC210"},
+    {s:1170,e:1230, cat:"routine", title:"Return commute · dinner", detail:""},
+    {s:1230,e:1530, cat:"free", title:"Open evening", detail:"Workouts · Rith · rest"},
+    {s:1530,e:1560, cat:"reading", title:"Book wind-down", detail:"Screen cutoff · 30 min"},
+  ],
+  5: [
+    {s:540,e:570, cat:"routine", title:"Wake up", detail:"Breakfast"},
+    {s:570,e:810, cat:"ml", title:"Deep ML sprint", detail:"4h technical focus · programming"},
+    {s:810,e:1530, cat:"free", title:"Total free buffer", detail:"Gym · downtime · no work guilt"},
+    {s:1530,e:1560, cat:"reading", title:"Book wind-down", detail:"Screen cutoff · 30 min"},
+  ],
+  6: [
+    {s:510,e:580, cat:"routine", title:"Wake · commute to NSU", detail:"Quick breakfast"},
+    {s:580,e:670, cat:"class", title:"CSE173 Discrete Math", detail:"Lecture", room:"SAC311"},
+    {s:680,e:770, cat:"class", title:"MAT125 Linear Algebra", detail:"Lecture", room:"NAC314"},
+    {s:770,e:810, cat:"routine", title:"Lunch on campus", detail:""},
+    {s:810,e:990, cat:"study", title:"Study block", detail:"NSU Library · CSE173 truth tables & proofs"},
+    {s:990,e:1080, cat:"spacend", title:"Spacend UI revisions", detail:"Visual review with Wasit"},
+    {s:1080,e:1170, cat:"class", title:"POL101 Political Economy", detail:"Lecture", room:"NAC210"},
+    {s:1185,e:1275, cat:"study", title:"ECO104 papers", detail:"Draft & submit · campus desk"},
+    {s:1275,e:1530, cat:"free", title:"Dinner · downtime", detail:"Wind-down after campus"},
+    {s:1530,e:1560, cat:"reading", title:"Book wind-down", detail:"Screen cutoff · 30 min"},
+  ],
+  0: [
+    {s:540,e:570, cat:"routine", title:"Wake up", detail:"Breakfast"},
+    {s:570,e:780, cat:"study", title:"Weekly math review", detail:"EEE154 lab portfolio updates"},
+    {s:780,e:1020, cat:"flex", title:"Flex zone", detail:"Startup emergencies · Spacend core code"},
+    {s:1020,e:1080, cat:"routine", title:"Dinner · break", detail:""},
+    {s:1080,e:1320, cat:"ml", title:"Deep ML project", detail:"Lab architecture · 4h build"},
+    {s:1320,e:1530, cat:"free", title:"Downtime · reset", detail:"Prep for the upcoming week"},
+    {s:1530,e:1560, cat:"reading", title:"Book wind-down", detail:"Screen cutoff · 30 min"},
+  ],
+};
+
+const DAYMETA = {
+  0:{n:"Sunday",    tag:"Weekend Clean-up"},
+  1:{n:"Monday",    tag:"Predictable Scale"},
+  2:{n:"Tuesday",   tag:"High-Flex Day"},
+  3:{n:"Wednesday", tag:"Predictable Scale"},
+  4:{n:"Thursday",  tag:"Campus Marathon"},
+  5:{n:"Friday",    tag:"ML & Recovery Fortress"},
+  6:{n:"Saturday",  tag:"Heavy Academic Day"},
+};
+
+/* ---- helpers ---- */
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,"0");
+function fmtTime(d){
+  let h=d.getHours(); const m=d.getMinutes(); const ap=h<12?"AM":"PM";
+  let h12=h%12; if(h12===0)h12=12;
+  return h12+":"+pad(m)+" "+ap;
+}
+function fmtClockMin(mins){
+  let m=((mins%1440)+1440)%1440;
+  let h=Math.floor(m/60), mi=m%60; const ap=h<12?"a":"p";
+  let h12=h%12; if(h12===0)h12=12;
+  return h12+":"+pad(mi)+ap;
+}
+function fmtDur(ms){
+  let mins=Math.floor(ms/60000);
+  if(mins<1) return "under 1m";
+  if(mins<60) return mins+"m";
+  const h=Math.floor(mins/60), m=mins%60;
+  return m===0 ? h+"h" : h+"h "+m+"m";
+}
+
+/* build concrete block instances across yesterday..tomorrow so midnight rollover + sleep gaps just work */
+function instances(now){
+  const arr=[];
+  for(let off=-1; off<=1; off++){
+    const base=new Date(now.getFullYear(), now.getMonth(), now.getDate()+off);
+    const dow=base.getDay();
+    (SCHEDULE[dow]||[]).forEach((b,i)=>{
+      arr.push({
+        start:new Date(base.getTime()+b.s*60000),
+        end:new Date(base.getTime()+b.e*60000),
+        b, base, dow, i
+      });
+    });
+  }
+  arr.sort((a,z)=>a.start-z.start);
+  return arr;
+}
+
+function computeState(now){
+  const arr=instances(now);
+  let current=null, next=null;
+  for(const it of arr){ if(it.start<=now && now<it.end){ current=it; break; } }
+  for(const it of arr){ if(it.start>now){ next=it; break; } }
+  const mode = current ? "awake" : "sleep";
+  const dayBase = current ? current.base : (next ? next.base : new Date(now.getFullYear(),now.getMonth(),now.getDate()));
+  const dow=dayBase.getDay();
+  const dayBlocks=(SCHEDULE[dow]||[]).map((b,i)=>({
+    start:new Date(dayBase.getTime()+b.s*60000),
+    end:new Date(dayBase.getTime()+b.e*60000), b, i
+  }));
+  const dayStart=dayBlocks[0].start, dayEnd=dayBlocks[dayBlocks.length-1].end;
+  const nowPos=Math.max(0,Math.min(1,(now-dayStart)/(dayEnd-dayStart)));
+  const up=arr.filter(it=>it.start>now).slice(0,3);
+  return {arr,current,next,mode,dayBase,dow,dayBlocks,dayStart,dayEnd,nowPos,up};
+}
+
+/* ---- day-line tooltip ---- */
+let tipFor=null;
+function showTip(seg,bl,cat){
+  const tip=$("barTip"), rail=$("rail");
+  const sw=tip.querySelector(".sw");
+  sw.style.background=cat.c; sw.style.color=cat.c;
+  tip.querySelector(".tk").textContent=cat.n;
+  tip.querySelector(".ac").textContent=bl.b.title;
+  tip.querySelector(".tm").textContent=fmtClockMin(bl.b.s)+" – "+fmtClockMin(bl.b.e)+(bl.b.room?"  ·  "+bl.b.room:"");
+  tip.hidden=false;
+  const r=seg.getBoundingClientRect(), rr=rail.getBoundingClientRect();
+  const tw=tip.offsetWidth, half=tw/2;
+  const segCenter=r.left+r.width/2-rr.left;
+  const cx=Math.max(half+2, Math.min(rr.width-half-2, segCenter));
+  tip.style.left=cx+"px";
+  let ax=segCenter-(cx-half);
+  ax=Math.max(12, Math.min(tw-12, ax));
+  tip.querySelector(".arw").style.left=ax+"px";
+  tipFor=seg;
+}
+function hideTip(){ $("barTip").hidden=true; tipFor=null; }
+function toggleTip(seg,bl,cat){ if(tipFor===seg) hideTip(); else showTip(seg,bl,cat); }
+document.addEventListener("click",()=>{ if(tipFor) hideTip(); });
+
+/* ---- NOW rendering ---- */
+let lastKey=null, refs={};
+function buildNow(st){
+  const dm=DAYMETA[st.dow];
+  $("dayName").firstChild.textContent=dm.n+" ";
+  $("dayTag").textContent=dm.tag;
+
+  // day-line segments
+  const bar=$("bar"); bar.innerHTML="";
+  const span=st.dayEnd-st.dayStart;
+  st.dayBlocks.forEach(bl=>{
+    const cat=CATS[bl.b.cat];
+    const seg=document.createElement("div");
+    seg.className="seg";
+    seg.style.width=((bl.end-bl.start)/span*100)+"%";
+    seg.style.background=cat.c;
+    seg.dataset.i=bl.i;
+    seg.tabIndex=0;
+    seg.setAttribute("role","button");
+    seg.setAttribute("aria-label",cat.n+": "+bl.b.title+", "+fmtClockMin(bl.b.s)+" to "+fmtClockMin(bl.b.e));
+    seg.addEventListener("mouseenter",()=>showTip(seg,bl,cat));
+    seg.addEventListener("mouseleave",hideTip);
+    seg.addEventListener("focus",()=>showTip(seg,bl,cat));
+    seg.addEventListener("blur",hideTip);
+    seg.addEventListener("click",e=>{ e.stopPropagation(); toggleTip(seg,bl,cat); });
+    bar.appendChild(seg);
+  });
+  const mark=document.createElement("div");
+  mark.className="nowmark"; mark.id="nowMark";
+  mark.innerHTML='<span class="bub" id="nowBub"></span>';
+  bar.appendChild(mark);
+  refs.segs=[...bar.querySelectorAll(".seg")];
+  refs.mark=mark; refs.bub=$("nowBub");
+  $("railStart").textContent=fmtClockMin(st.dayBlocks[0].b.s)+" · wake";
+
+  // hero
+  const hero=$("hero");
+  if(st.mode==="awake"){
+    const c=CATS[st.current.b.cat];
+    hero.classList.remove("sleep");
+    hero.style.setProperty("--c",c.c);
+    $("nowLbl").style.setProperty("--c",c.c);
+    $("nowLblTxt").textContent="Right now";
+    $("hTrack").textContent=c.n;
+    $("hTrack").style.display="";
+    $("hTtl").textContent=st.current.b.title;
+    $("hDet").textContent=st.current.b.detail||"";
+    $("hDet").style.display=st.current.b.detail?"":"none";
+    if(st.current.b.room){ $("hRoom").style.display=""; $("hRoom").textContent="Room "+st.current.b.room; }
+    else $("hRoom").style.display="none";
+    $("hRng").textContent=fmtTime(st.current.start)+" – "+fmtTime(st.current.end);
+    $("hProgWrap").style.display="";
+  } else {
+    hero.classList.add("sleep");
+    hero.style.setProperty("--c","#5f6b7a");
+    $("nowLbl").style.setProperty("--c","#5f6b7a");
+    $("nowLblTxt").textContent="Off the clock";
+    $("hTrack").textContent="Sleep window";
+    $("hTtl").textContent="Rest";
+    $("hDet").textContent="Hard sleep window · cannabis / melatonin protocol. Nothing scheduled.";
+    $("hDet").style.display="";
+    $("hRoom").style.display="none";
+    $("hRng").textContent = st.next ? "Next wake · "+fmtTime(st.next.start) : "";
+    $("hProgWrap").style.display="none";
+  }
+
+  // up next
+  const un=$("upNext"); un.innerHTML="";
+  if(st.up.length===0){
+    un.innerHTML='<div class="up"><div class="t">—</div><div></div><div class="nm"><b>Nothing more scheduled</b></div></div>';
+    refs.ups=[];
+  } else {
+    refs.ups=[];
+    st.up.forEach((it,idx)=>{
+      const c=CATS[it.b.cat];
+      const el=document.createElement("div");
+      el.className="up"+(idx===0?" first":"");
+      el.style.setProperty("--c",c.c);
+      el.innerHTML='<div class="t">'+fmtTime(it.start)+'</div>'
+        +'<div class="pip"></div>'
+        +'<div class="nm"><b>'+it.b.title+'</b><span>'+c.n+'</span></div>'
+        +'<div class="in"></div>';
+      un.appendChild(el);
+      refs.ups.push({el:el.querySelector(".in"), start:it.start});
+    });
+  }
+}
+
+function updateNowDynamic(st,now){
+  // clock
+  $("clock").firstChild.textContent=fmtTime(now);
+  $("clockSub").textContent=now.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+
+  // past-midnight note
+  const todayStr=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toDateString();
+  const mn=$("midNote");
+  if(st.mode==="awake" && st.dayBase.toDateString()!==todayStr){
+    mn.style.display=""; mn.textContent="↳ past midnight — still running "+DAYMETA[st.dow].n+"'s plan";
+  } else if(st.mode==="sleep" && st.next && st.dayBase.toDateString()!==todayStr){
+    mn.style.display=""; mn.textContent="↳ "+DAYMETA[st.dow].n+"'s plan begins after you wake";
+  } else mn.style.display="none";
+
+  // marker + bubble
+  if(refs.mark){ refs.mark.style.left=(st.nowPos*100)+"%"; refs.bub.textContent=fmtTime(now); }
+  // segment states
+  if(refs.segs){
+    refs.segs.forEach(seg=>{
+      const i=+seg.dataset.i;
+      seg.classList.toggle("live", st.mode==="awake" && st.current && i===st.current.i);
+      const bl=st.dayBlocks[i];
+      seg.classList.toggle("past", now>=bl.end);
+    });
+  }
+  // hero dynamic
+  if(st.mode==="awake" && st.current){
+    const p=Math.max(0,Math.min(1,(now-st.current.start)/(st.current.end-st.current.start)));
+    $("hProg").style.width=(p*100)+"%";
+    $("hCd").innerHTML="<b>"+fmtDur(st.current.end-now)+"</b> left";
+  } else if(st.next){
+    $("hCd").innerHTML="wake in <b>"+fmtDur(st.next.start-now)+"</b>";
+  } else $("hCd").textContent="";
+
+  // up next "in"
+  if(refs.ups){ refs.ups.forEach(u=> u.el.textContent="in "+fmtDur(u.start-now)); }
+}
+
+/* ---- WEEK rendering ---- */
+let weekBuilt=false, weekRows={};
+function buildLegend(){
+  const order=["cto","spacend","ml","flex","class","study","buffer","free","routine","reading"];
+  const lg=$("legend"); lg.innerHTML="";
+  order.forEach(k=>{
+    const el=document.createElement("div");
+    el.className="lg"; el.style.setProperty("--c",CATS[k].c);
+    el.innerHTML='<span class="sw"></span>'+CATS[k].n;
+    lg.appendChild(el);
+  });
+}
+function buildWeek(now){
+  const todayDow=now.getDay();
+  const grid=$("grid"); grid.innerHTML=""; weekRows={};
+  const order=[1,2,3,4,5,6,0];
+  order.forEach(dow=>{
+    const dm=DAYMETA[dow];
+    const card=document.createElement("div");
+    card.className="card"+(dow===todayDow?" today":"");
+    let head='<div class="ch"><div><span class="dd">'+dm.n+'</span><span class="tg">'+dm.tag+'</span></div>'
+      +(dow===todayDow?'<span class="badge">TODAY</span>':'')+'</div>';
+    let rows="";
+    SCHEDULE[dow].forEach((b,i)=>{
+      if(b.cat==="reading") { /* keep, it's part of the day */ }
+      const c=CATS[b.cat];
+      rows+='<div class="row" id="wk-'+dow+'-'+i+'" style="--c:'+c.c+'">'
+        +'<div class="rt">'+fmtClockMin(b.s)+"–"+fmtClockMin(b.e)+'</div>'
+        +'<div class="rb"><b>'+b.title+'</b>'
+        +(b.detail?'<small>'+b.detail+'</small>':'')
+        +(b.room?'<span class="rm">'+b.room+'</span>':'')
+        +'</div></div>';
+    });
+    card.innerHTML=head+rows;
+    grid.appendChild(card);
+  });
+  weekBuilt=true;
+}
+function updateWeekLive(st,now){
+  const todayStr=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toDateString();
+  // clear old
+  document.querySelectorAll(".row.live").forEach(r=>r.classList.remove("live"));
+  if(st.mode==="awake" && st.current){
+    const el=$("wk-"+st.current.dow+"-"+st.current.i);
+    // only highlight when the active wake-day card corresponds to the current block's own day
+    if(el) el.classList.add("live");
+  }
+}
+
+/* ---- tabs ---- */
+function setTab(which){
+  const now=which==="now";
+  $("tabNow").classList.toggle("on",now); $("tabNow").setAttribute("aria-selected",now);
+  $("tabWeek").classList.toggle("on",!now); $("tabWeek").setAttribute("aria-selected",!now);
+  $("panelNow").classList.toggle("on",now);
+  $("panelWeek").classList.toggle("on",!now);
+}
+$("tabNow").onclick=()=>setTab("now");
+$("tabWeek").onclick=()=>setTab("week");
+
+/* ---- brand dot cycles the track palette (ambient signature) ---- */
+(function(){
+  const cols=["#22d3ee","#f5a623","#f472b6","#a78bfa","#60a5fa","#4ade80"];
+  let k=0; const dot=$("brandDot");
+  setInterval(()=>{ k=(k+1)%cols.length; dot.style.color=cols[k]; dot.style.background=cols[k]; },2600);
+  dot.style.color=cols[0]; dot.style.background=cols[0];
+})();
+
+/* ---- main loop ---- */
+let lastWeekDay=null;
+function tick(){
+  const now=new Date();
+  const st=computeState(now);
+  const key=st.mode+"|"+st.dayBase.toDateString()+"|"+(st.current?st.current.dow+":"+st.current.i:"sleep");
+  if(key!==lastKey){ buildNow(st); lastKey=key; }
+  updateNowDynamic(st,now);
+
+  const dstr=now.toDateString();
+  if(dstr!==lastWeekDay){ buildWeek(now); lastWeekDay=dstr; }
+  updateWeekLive(st,now);
+}
+buildLegend();
+$("foot").textContent="Days run to a 2:00 AM sleep window — after midnight you're still on the previous day's plan. Updates live.";
+tick();
+setInterval(tick,1000);
+</script>
+</body>
+</html>
