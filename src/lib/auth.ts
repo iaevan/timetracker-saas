@@ -59,7 +59,19 @@ export function createAuth(d1: D1Database, secret?: string) {
   return betterAuth({
     appName: "Daily Line",
     secret: secret || process.env.BETTER_AUTH_SECRET,
-    baseURL: process.env.BETTER_AUTH_URL || "https://dailyline.spacend-digital.workers.dev",
+    baseURL: {
+      allowedHosts: [
+        "dailyline.spacend-digital.workers.dev",
+        "routine.spacendigital.com",
+        "localhost:3000",
+      ],
+      fallback: "https://routine.spacendigital.com",
+      protocol: "https",
+    },
+    trustedOrigins: [
+      "https://dailyline.spacend-digital.workers.dev",
+      "https://routine.spacendigital.com",
+    ],
     database: {
       db: createDb(d1),
       type: "sqlite",
