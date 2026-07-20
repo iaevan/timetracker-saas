@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Daily Line
 
-## Getting Started
+Your routine, live. Sign up, build weekly routines out of categorized time
+blocks, and see exactly what you should be doing **right now** — a glowing
+timeline rail, the current block front and center, and what's up next.
 
-First, run the development server:
+Dark-first Material Design 3 Expressive UI. Accessibility-first (text
+scaling, high contrast, reduced motion, full keyboard support).
+
+**Live:** https://dailyline.spacend-digital.workers.dev
+
+## Stack
+
+- Next.js 16 (App Router, Server Components + Server Actions)
+- Cloudflare Workers (via `@opennextjs/cloudflare`) + D1 (SQLite) via Kysely
+- better-auth (email + password)
+- Hand-rolled M3 Expressive design system (no UI library)
+
+## Develop
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run db:migrate:local   # create local D1 schema
+npm run dev                # next dev (bindings via miniflare)
+npm run preview            # build + run in the real Workers runtime
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run deploy             # opennextjs-cloudflare build + deploy
+npm run db:migrate:remote  # apply D1 migrations to prod
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Every push to `main` also auto-deploys via Cloudflare Workers Builds
+(connected to this repo; build command `npm run deploy`).
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Now view** — live day rail with past/current dimming, hero card with
+  wavy expressive progress + countdown, up-next queue, past-midnight handling
+- **Week view** — all seven days at a glance, live "now" highlight
+- **Editor** — per-day block CRUD (FAB + dialogs), overlap warnings,
+  editable day taglines
+- **Categories** — full CRUD with color swatches; deleting one gracefully
+  falls back to "Uncategorized"
+- **Routines** — multiple routines (e.g. semester vs. break), switch / copy /
+  rename / delete from the app bar
+- **Accounts** — email + password sign-up; your original Daily Line routine
+  is seeded automatically on first sign-up
