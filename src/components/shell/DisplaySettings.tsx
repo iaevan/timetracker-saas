@@ -40,6 +40,7 @@ export function DisplaySettings({ open, onClose }: { open: boolean; onClose: () 
   const [prefs, setPrefs] = useState<DisplayPrefs>(DEFAULTS);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) setPrefs(load());
   }, [open]);
 

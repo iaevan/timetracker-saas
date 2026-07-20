@@ -271,7 +271,7 @@ function validateBlock(input: BlockInput): { v: BlockInput } | { error: string }
   const room = input.room.trim().slice(0, 60);
   const dayOfWeek = Math.floor(input.dayOfWeek);
   if (dayOfWeek < 0 || dayOfWeek > 6) return { error: "Invalid day" };
-  let startMin = Math.round(input.startMin);
+  const startMin = Math.round(input.startMin);
   let endMin = Math.round(input.endMin);
   if (startMin < 0 || startMin > 1439 || endMin < 0 || endMin > 1439) return { error: "Times must be within a day" };
   if (endMin <= startMin) endMin += 1440; // runs past midnight

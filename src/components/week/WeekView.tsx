@@ -5,10 +5,9 @@ import { computeState, fmtClockMin } from "@/lib/schedule";
 import type { Category, ResolvedBlock } from "@/lib/types";
 import { DAY_NAMES, DAY_ORDER } from "@/lib/types";
 
-function useNow(): Date | null {
-  const [now, setNow] = useState<Date | null>(null);
+function useNow(): Date {
+  const [now, setNow] = useState(new Date());
   useEffect(() => {
-    setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -25,7 +24,7 @@ export function WeekView({
   dayTags: Record<number, string>;
 }) {
   const now = useNow();
-  const st = useMemo(() => (now ? computeState(now, blocks) : null), [now, blocks]);
+  const st = useMemo(() => computeState(now, blocks), [now, blocks]);
 
   const byDow = useMemo(() => {
     const m = new Map<number, ResolvedBlock[]>();
@@ -42,19 +41,6 @@ export function WeekView({
     const used = new Set(blocks.map((b) => b.categoryId).filter(Boolean));
     return categories.filter((c) => used.has(c.id));
   }, [blocks, categories]);
-
-  if (!now) {
-    return (
-      <div aria-busy="true">
-        <div className="skel" style={{ height: "3.5rem", marginBottom: "1.25rem" }} />
-        <div className="wk-grid">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="skel" style={{ height: "16rem" }} />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   const todayDow = now.getDay();
   const liveBlockId = st?.current?.block.id ?? null;

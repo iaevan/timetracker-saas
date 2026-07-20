@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useRef,
   useState,
   type ReactNode,
@@ -231,7 +232,7 @@ export function LinearProgress({ pct, color }: { pct: number; color?: string }) 
 
 /** M3 Expressive wavy linear progress — undulating stroke with slow drift. */
 export function WavyProgress({ pct, color }: { pct: number; color?: string }) {
-  const id = useRef(`w${Math.random().toString(36).slice(2, 8)}`).current;
+  const id = useId();
   // one sine period every 24px, amplitude ~2.6px, baseline at y=6 (viewBox height 12)
   const wave =
     "M0 6 q 6 -5.2 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0";

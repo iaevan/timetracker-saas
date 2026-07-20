@@ -15,10 +15,9 @@ import { DAY_NAMES } from "@/lib/types";
 
 const SLEEP_COLOR = "#5f6b7a";
 
-function useNow(): Date | null {
-  const [now, setNow] = useState<Date | null>(null);
+function useNow(): Date {
+  const [now, setNow] = useState(new Date());
   useEffect(() => {
-    setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -33,7 +32,7 @@ export function NowView({
   dayTags: Record<number, string>;
 }) {
   const now = useNow();
-  const st = useMemo(() => (now ? computeState(now, blocks) : null), [now, blocks]);
+  const st = useMemo(() => computeState(now, blocks), [now, blocks]);
   const [tip, setTip] = useState<{ key: string; left: number } | null>(null);
   const tipSticky = useRef(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -62,7 +61,7 @@ export function NowView({
     return () => document.removeEventListener("pointerdown", onDoc);
   }, [tip]);
 
-  if (!now || !st) {
+  if (!st) {
     return (
       <div aria-busy="true">
         <div className="skel" style={{ height: "3.5rem", marginBottom: "1rem" }} />

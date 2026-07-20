@@ -58,7 +58,8 @@ async function seedStarterRoutine(db: AppKysely, userId: string) {
 export function createAuth(d1: D1Database, secret?: string) {
   return betterAuth({
     appName: "Daily Line",
-    secret,
+    secret: secret || process.env.BETTER_AUTH_SECRET,
+    baseURL: process.env.BETTER_AUTH_URL || "https://dailyline.spacend-digital.workers.dev",
     database: {
       db: createDb(d1),
       type: "sqlite",

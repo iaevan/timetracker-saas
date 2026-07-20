@@ -8,14 +8,24 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "routes": [
+    {
+      "pattern": "routine.spacendigital.com",
+      "zone_name": "spacendigital.com",
+      "custom_domain": true
+    }
+  ],
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "dailyline"
+      "service": "dailyline",
+      "environment": "production"
     }
   ],
+  "vars": {
+    "BETTER_AUTH_URL": "https://dailyline.spacend-digital.workers.dev"
+  },
   "workers_dev": true,
-  "preview_urls": true,
   "d1_databases": [
     {
       "binding": "DB",
