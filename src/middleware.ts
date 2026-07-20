@@ -15,8 +15,10 @@ function hasSessionCookie(request: NextRequest): boolean {
 /**
  * Optimistic auth gate — checks only for the presence of a session cookie.
  * Real verification happens in server components via auth.api.getSession.
+ * (Uses the edge middleware convention: OpenNext does not yet support
+ * Next 16's Node-runtime `proxy.ts`.)
  */
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const authed = hasSessionCookie(request);
 

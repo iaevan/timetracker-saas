@@ -18,7 +18,8 @@ Production: https://dailyline.spacend-digital.workers.dev
   **Cloudflare Workers** via `@opennextjs/cloudflare`
 - **Cloudflare D1** (SQLite) via **Kysely** (`kysely-d1`)
 - **better-auth** (email + password) — session cookie gate in
-  `src/proxy.ts`
+  `src/middleware.ts` (edge middleware; OpenNext does not support Next 16's
+  Node-runtime `proxy.ts` — must keep as `middleware.ts`)
 - Hand-rolled **M3 Expressive** design system in `src/app/globals.css`
   (tokens: color roles, type/shape/motion, state layers; components as BEM-ish
   classes + thin React wrappers in `src/components/m3/`)
@@ -37,7 +38,7 @@ Production: https://dailyline.spacend-digital.workers.dev
 
 - `src/app/(main)/` — authed shell: `page.tsx` (Now), `week/`, `edit/`
 - `src/app/(auth)/` — `login/`, `signup/`
-- `src/proxy.ts` — auth gate (checks session cookie, redirects to login)
+- `src/middleware.ts` — auth gate (checks session cookie, redirects to login)
 - `src/app/api/auth/[...all]/route.ts` — better-auth handler
 - `src/lib/` — `db.ts` (Kysely + D1 + queries), `auth.ts` (better-auth
   factory + starter-routine seed), `actions.ts` (all server actions),
