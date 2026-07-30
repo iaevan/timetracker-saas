@@ -58,7 +58,7 @@ async function seedStarterRoutine(db: AppKysely, userId: string) {
 export function createAuth(d1: D1Database, secret?: string) {
   return betterAuth({
     appName: "Daily Line",
-    secret: secret || process.env.BETTER_AUTH_SECRET,
+    secret: secret || process.env.BETTER_AUTH_SECRET || "",
     baseURL: {
       allowedHosts: [
         "dailyline.spacend-digital.workers.dev",
@@ -78,8 +78,12 @@ export function createAuth(d1: D1Database, secret?: string) {
     },
     emailAndPassword: {
       enabled: true,
-      minPasswordLength: 8,
+      minPasswordLength: 10,
       autoSignIn: true,
+    },
+    rateLimit: {
+      window: 60,
+      max: 100,
     },
     plugins: [nextCookies()],
     databaseHooks: {

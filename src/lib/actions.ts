@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { chunkedInsert, getDb, getActiveBundle, type AppKysely } from "./db";
+import { checkRateLimit } from "./rate-limit";
 import { requireUser } from "./session";
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -31,6 +32,7 @@ export async function createRoutine(name: string, copyFromId: string | null): Pr
   if (!name) return fail("Name your routine");
 
   const db = await getDb();
+  if (!(await checkRateLimit(db, user.id, "createRoutine"))) return fail("Too many requests");
   const count = await db
     .selectFrom("routines")
     .select(({ fn }) => fn.countAll<number>().as("n"))
@@ -126,6 +128,7 @@ export async function renameRoutine(routineId: string, name: string): Promise<Re
   name = name.trim().slice(0, 80);
   if (!name) return fail("Name cannot be empty");
   const db = await getDb();
+  if (!(await checkRateLimit(db, user.id, "renameRoutine"))) return fail("Too many requests");
   await db
     .updateTable("routines")
     .set({ name })
@@ -140,6 +143,7 @@ export async function deleteRoutine(routineId: string): Promise<Result> {
   const user = await requireUser();
   if (!user) return fail("Not signed in");
   const db = await getDb();
+  if (!(await checkRateLimit(db, user.id, "deleteRoutine"))) return fail("Too many requests");
   const routines = await db
     .selectFrom("routines")
     .selectAll()
@@ -149,7 +153,7 @@ export async function deleteRoutine(routineId: string): Promise<Result> {
   if (routines.length <= 1) return fail("You need at least one routine");
   const target = routines.find((r) => r.id === routineId);
   if (!target) return fail("Routine not found");
-  await db.deleteFrom("routines").where("id", "=", routineId).execute();
+  await db.deleteFrom("routines").where("id", "=", routineId).where("user_id", "=", user.id).execute();
   if (target.is_active === 1) {
     const next = routines.find((r) => r.id !== routineId);
     if (next) await setActive(db, user.id, next.id);
@@ -172,6 +176,7 @@ export async function setActiveRoutine(routineId: string): Promise<Result> {
   const user = await requireUser();
   if (!user) return fail("Not signed in");
   const db = await getDb();
+  if (!(await checkRateLimit(db, user.id, "setActiveRoutine"))) return fail("Too many requests");
   await setActive(db, user.id, routineId);
   revalidateAll();
   return ok;
@@ -182,6 +187,7 @@ export async function setDayTag(dayOfWeek: number, tag: string): Promise<Result>
   if (!user) return fail("Not signed in");
   if (dayOfWeek < 0 || dayOfWeek > 6) return fail("Invalid day");
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "setDayTag"))) return fail("Too many requests");
   const tags = { ...bundle.routine.dayTags, [dayOfWeek]: tag.trim().slice(0, 60) };
   if (!tag.trim()) delete tags[dayOfWeek];
   await db
@@ -202,6 +208,7 @@ export async function createCategory(name: string, color: string): Promise<Resul
   if (!name) return fail("Name the category");
   if (!/^#[0-9a-fA-F]{6}$/.test(color)) return fail("Pick a color");
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "createCategory"))) return fail("Too many requests");
   const maxSort = await db
     .selectFrom("categories")
     .select(({ fn }) => fn.max("sort_order").as("m"))
@@ -228,6 +235,7 @@ export async function updateCategory(categoryId: string, name: string, color: st
   if (!name) return fail("Name cannot be empty");
   if (!/^#[0-9a-fA-F]{6}$/.test(color)) return fail("Pick a color");
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "updateCategory"))) return fail("Too many requests");
   await db
     .updateTable("categories")
     .set({ name, color })
@@ -242,6 +250,7 @@ export async function deleteCategory(categoryId: string): Promise<Result> {
   const user = await requireUser();
   if (!user) return fail("Not signed in");
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "deleteCategory"))) return fail("Too many requests");
   // blocks keep their data, category becomes "Uncategorized" (set null via FK)
   await db
     .deleteFrom("categories")
@@ -285,6 +294,10 @@ export async function createBlock(input: BlockInput): Promise<Result> {
   const parsed = validateBlock(input);
   if ("error" in parsed) return fail(parsed.error);
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "createBlock"))) return fail("Too many requests");
+  if (parsed.v.categoryId && !bundle.categories.some((c) => c.id === parsed.v.categoryId)) {
+    return fail("Invalid category");
+  }
   const maxSort = await db
     .selectFrom("blocks")
     .select(({ fn }) => fn.max("sort_order").as("m"))
@@ -315,6 +328,10 @@ export async function updateBlock(blockId: string, input: BlockInput): Promise<R
   const parsed = validateBlock(input);
   if ("error" in parsed) return fail(parsed.error);
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "updateBlock"))) return fail("Too many requests");
+  if (parsed.v.categoryId && !bundle.categories.some((c) => c.id === parsed.v.categoryId)) {
+    return fail("Invalid category");
+  }
   await db
     .updateTable("blocks")
     .set({
@@ -337,6 +354,7 @@ export async function deleteBlock(blockId: string): Promise<Result> {
   const user = await requireUser();
   if (!user) return fail("Not signed in");
   const { db, bundle } = await requireActive(user.id);
+  if (!(await checkRateLimit(db, user.id, "deleteBlock"))) return fail("Too many requests");
   await db
     .deleteFrom("blocks")
     .where("id", "=", blockId)

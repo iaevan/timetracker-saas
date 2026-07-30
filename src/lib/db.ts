@@ -36,10 +36,17 @@ export interface BlocksTable {
   sort_order: number;
 }
 
+export interface RateLimitsTable {
+  user_id: string;
+  action: string;
+  created_at: number;
+}
+
 export interface AppDatabase {
   routines: RoutinesTable;
   categories: CategoriesTable;
   blocks: BlocksTable;
+  rate_limits: RateLimitsTable;
 }
 
 export type AppKysely = Kysely<AppDatabase>;

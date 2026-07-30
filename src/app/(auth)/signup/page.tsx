@@ -59,8 +59,8 @@ export default function SignupPage() {
             type="password"
             autoComplete="new-password"
             required
-            minLength={8}
-            support="At least 8 characters"
+            minLength={10}
+            support="At least 10 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
