@@ -5,7 +5,7 @@ blocks, and see exactly what you should be doing **right now** — a glowing
 timeline rail, the current block front and center, and what's up next.
 
 Dark-first Material Design 3 Expressive UI. Accessibility-first (text
-scaling, high contrast, reduced motion, full keyboard support).
+scaling, high contrast, full keyboard support).
 
 **Live:** https://dailyline.spacend-digital.workers.dev
 

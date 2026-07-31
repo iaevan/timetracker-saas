@@ -58,9 +58,17 @@ Production: https://dailyline.spacend-digital.workers.dev
 - **D1 gotcha**: max 100 bound params/statement — use `chunkedInsert()`
   from `db.ts` for multi-row inserts.
 - **A11y is a feature**: 48px targets, `:focus-visible` rings, aria-live for
-  block changes, `prefers-reduced-motion` / `prefers-contrast` /
-  `forced-colors` support, user display prefs (theme/text size/contrast/motion)
-  stored in `localStorage["dl-display"]` and applied via `data-*` on `<html>`.
+  block changes, `forced-colors` support, user display prefs
+  (theme/text size/contrast) stored in `localStorage["dl-display"]` and
+  applied via `data-*` on `<html>`. Motion is always on — the design is
+  expressive-first (drifting wavy progress, shared-axis tab transitions,
+  springy ripples); there is deliberately no reduced-motion mode.
+- **Motion**: M3 transition patterns live in `globals.css`
+  (`axis-x-fwd/back` shared-axis, `fade-through`, spring `dlg-in`,
+  `snack-in`, ripple). `WavyProgress` drifts via `wprog-drift` keyframes on
+  an overrun wave path (one 24px period past both viewBox edges, looped with
+  `translateX(-24px)`). Tab navigation slides via `PageTransition` in
+  `src/components/shell/`.
 - IDs: `crypto.randomUUID()`. Money-style numbers use `tabular-nums`.
 
 ## Secrets

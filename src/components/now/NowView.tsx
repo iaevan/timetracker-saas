@@ -184,7 +184,8 @@ export function NowView({
         {current ? "Right now" : "Off the clock"}
       </div>
       <section
-        className={`hero${current ? "" : " sleep"}`}
+        key={current ? current.block.id : "off"}
+        className={`hero fade-through${current ? "" : " sleep"}`}
         style={{ "--c": heroColor } as React.CSSProperties}
         aria-label={current ? `Current activity: ${current.block.title}` : "Resting"}
       >

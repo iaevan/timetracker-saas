@@ -230,12 +230,28 @@ export function LinearProgress({ pct, color }: { pct: number; color?: string }) 
   );
 }
 
-/** M3 Expressive wavy linear progress — undulating stroke with slow drift. */
+/** M3 Expressive wavy linear progress — drifting wave, emphasized fill, stop dot. */
+
+/** One full wave period is 24px: up-curve (12) + reflected down-curve (12). */
+const WAVE_PERIOD = 24;
+
+/** Build a wave path spanning [fromX, toX] so drift can loop without gaps. */
+function wavePath(fromX: number, toX: number): string {
+  let d = `M${fromX} 6 q 6 -5.2 12 0`;
+  let x = fromX + 12;
+  while (x < toX) {
+    d += " t 12 0";
+    x += 12;
+  }
+  return d;
+}
+
+/* spans well past the 600-wide viewBox on both sides so translating one
+   full period never exposes an edge */
+const WAVE_D = wavePath(-WAVE_PERIOD * 2, 600 + WAVE_PERIOD * 2);
+
 export function WavyProgress({ pct, color }: { pct: number; color?: string }) {
   const id = useId();
-  // one sine period every 24px, amplitude ~2.6px, baseline at y=6 (viewBox height 12)
-  const wave =
-    "M0 6 q 6 -5.2 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0 t 12 0";
   return (
     <div
       className="wprog"
@@ -248,13 +264,16 @@ export function WavyProgress({ pct, color }: { pct: number; color?: string }) {
       <svg viewBox="0 0 600 12" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <clipPath id={`${id}-clip`}>
-            <rect x="0" y="0" width={600 * pct} height="12" rx="0" style={{ transition: "width 900ms linear" }} />
+            <rect className="fill" x="0" y="0" width={600 * pct} height="12" rx="0" />
           </clipPath>
         </defs>
-        <path className="trk" d={wave} fill="none" strokeWidth="3.5" strokeLinecap="round" />
-        <g clipPath={`url(#${id}-clip)`}>
-          <path className="val" d={wave} fill="none" strokeWidth="3.5" strokeLinecap="round" />
+        <g className="wave">
+          <path className="trk" d={WAVE_D} fill="none" strokeWidth="3.5" strokeLinecap="round" />
+          <g clipPath={`url(#${id}-clip)`}>
+            <path className="val" d={WAVE_D} fill="none" strokeWidth="3.5" strokeLinecap="round" />
+          </g>
         </g>
+        <circle className="stop" cx="596" cy="6" r="2.4" />
       </svg>
     </div>
   );

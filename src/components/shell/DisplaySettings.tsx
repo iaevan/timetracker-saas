@@ -8,10 +8,9 @@ interface DisplayPrefs {
   theme: "dark" | "light" | "system";
   text: "normal" | "large" | "xlarge";
   contrast: "standard" | "high";
-  motion: "full" | "reduced";
 }
 
-const DEFAULTS: DisplayPrefs = { theme: "dark", text: "normal", contrast: "standard", motion: "full" };
+const DEFAULTS: DisplayPrefs = { theme: "dark", text: "normal", contrast: "standard" };
 
 function load(): DisplayPrefs {
   try {
@@ -32,8 +31,6 @@ function apply(p: DisplayPrefs) {
   else d.removeAttribute("data-contrast");
   if (p.text !== "normal") d.setAttribute("data-text", p.text);
   else d.removeAttribute("data-text");
-  if (p.motion === "reduced") d.setAttribute("data-motion", "reduced");
-  else d.removeAttribute("data-motion");
 }
 
 export function DisplaySettings({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -93,19 +90,6 @@ export function DisplaySettings({ open, onClose }: { open: boolean; onClose: () 
             label="High contrast"
             checked={prefs.contrast === "high"}
             onChange={(v) => update({ contrast: v ? "high" : "standard" })}
-          />
-        </div>
-        <div className="row-between">
-          <div>
-            <div style={{ font: "var(--title-md)" }}>Reduce motion</div>
-            <div style={{ font: "var(--body-sm)", color: "var(--on-surface-variant)" }}>
-              Turns off animations and ripples
-            </div>
-          </div>
-          <Switch
-            label="Reduce motion"
-            checked={prefs.motion === "reduced"}
-            onChange={(v) => update({ motion: v ? "reduced" : "full" })}
           />
         </div>
       </div>

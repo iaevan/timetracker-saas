@@ -11,8 +11,6 @@ const RIPPLE_SELECTOR =
 
 export function Ripple() {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
     let active: { el: HTMLElement; rip: HTMLSpanElement } | null = null;
 
     const spawn = (e: PointerEvent) => {

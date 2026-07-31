@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { getSession } from "@/lib/session";
 import { getDb, listRoutines } from "@/lib/db";
 import { ViewTabs } from "./ViewTabs";
+import { PageTransition } from "./PageTransition";
 import { RoutineMenu, BrandDot } from "./RoutineMenu";
 import { UserMenu } from "./UserMenu";
 
@@ -29,8 +30,8 @@ export async function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <ViewTabs />
-      <main className="shell-main page-enter" id="main">
-        {children}
+      <main className="shell-main" id="main">
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   );

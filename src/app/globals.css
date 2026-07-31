@@ -573,11 +573,18 @@ dialog.m3-dialog.closing::backdrop { animation: fade-out var(--dur-2) var(--ease
   transition: width 900ms linear;
   box-shadow: 0 0 0.75rem color-mix(in srgb, var(--c, var(--primary)) 65%, transparent);
 }
-/* wavy expressive variant — undulating thumb edge */
+/* wavy expressive variant — undulating thumb edge with constant drift */
 .wprog { position: relative; height: 0.75rem; }
 .wprog svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .wprog .trk { stroke: color-mix(in srgb, var(--c, var(--primary)) 18%, var(--surface-container-lowest)); }
-.wprog .val { stroke: var(--c, var(--primary)); transition: stroke-dashoffset 900ms linear; filter: drop-shadow(0 0 0.3rem color-mix(in srgb, var(--c, var(--primary)) 60%, transparent)); }
+.wprog .val { stroke: var(--c, var(--primary)); filter: drop-shadow(0 0 0.3rem color-mix(in srgb, var(--c, var(--primary)) 60%, transparent)); }
+/* one period = 24px; the path overruns the viewBox by 2 periods each side so the loop never gaps */
+.wprog .wave { animation: wprog-drift 1.6s linear infinite; }
+@keyframes wprog-drift { to { transform: translateX(-24px); } }
+/* progress changes glide with M3 emphasized deceleration */
+.wprog .fill { transition: width var(--dur-7) var(--ease-emph); }
+/* M3 stop indicator at the end of the track */
+.wprog .stop { fill: color-mix(in srgb, var(--c, var(--primary)) 55%, var(--surface-container-lowest)); }
 
 /* ============ tooltip ============ */
 [data-tip] { position: relative; }
@@ -600,12 +607,15 @@ dialog.m3-dialog.closing::backdrop { animation: fade-out var(--dur-2) var(--ease
 .ripple.out { transition: opacity var(--dur-5) var(--ease-std); opacity: 0; }
 @keyframes ripple-in { to { transform: scale(1); } }
 
-/* ============ page transitions (expressive enter) ============ */
-.page-enter { animation: page-in var(--dur-6) var(--ease-emph); }
-@keyframes page-in {
-  from { opacity: 0; transform: translateY(0.75rem); }
-  to { opacity: 1; transform: none; }
-}
+/* ============ M3 transition patterns ============ */
+/* shared axis X — lateral navigation between sibling tabs */
+@keyframes axis-x-in-fwd { from { opacity: 0; transform: translateX(2.5rem); } to { opacity: 1; transform: none; } }
+@keyframes axis-x-in-back { from { opacity: 0; transform: translateX(-2.5rem); } to { opacity: 1; transform: none; } }
+.axis-x-fwd { animation: axis-x-in-fwd var(--dur-6) var(--ease-emph); }
+.axis-x-back { animation: axis-x-in-back var(--dur-6) var(--ease-emph); }
+/* fade through — incoming content fades in with a subtle settle (hero swaps) */
+@keyframes fade-through-in { from { opacity: 0; transform: scale(0.985); } to { opacity: 1; transform: none; } }
+.fade-through { animation: fade-through-in var(--dur-5) var(--ease-emph); }
 
 /* ============================================================
    APP-SPECIFIC: Now / Week / Editor
@@ -670,10 +680,7 @@ dialog.m3-dialog.closing::backdrop { animation: fade-out var(--dur-2) var(--ease
 
 /* ---- hero (current block) ---- */
 .nowlbl { display: flex; align-items: center; gap: 0.625rem; font: var(--label-lg); text-transform: uppercase; letter-spacing: 0.07rem; color: var(--on-surface-variant); margin: 1.5rem 0 0.75rem; }
-.nowlbl .pip { width: 0.625rem; height: 0.625rem; border-radius: 50%; background: var(--c, var(--neutral-cat)); box-shadow: 0 0 0.75rem 1px color-mix(in srgb, var(--c, var(--neutral-cat)) 70%, transparent); }
-@media (prefers-reduced-motion: no-preference) {
-  .nowlbl .pip { animation: pip-pulse 2.1s ease-in-out infinite; }
-}
+.nowlbl .pip { width: 0.625rem; height: 0.625rem; border-radius: 50%; background: var(--c, var(--neutral-cat)); box-shadow: 0 0 0.75rem 1px color-mix(in srgb, var(--c, var(--neutral-cat)) 70%, transparent); animation: pip-pulse 2.1s ease-in-out infinite; }
 @keyframes pip-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 .hero {
@@ -809,22 +816,6 @@ dialog.m3-dialog.closing::backdrop { animation: fade-out var(--dur-2) var(--ease
 /* skeleton shimmer for loading states */
 .skel { border-radius: var(--shape-md); background: linear-gradient(100deg, var(--surface-container-low) 40%, var(--surface-container-high) 50%, var(--surface-container-low) 60%); background-size: 200% 100%; animation: skel 1.4s var(--ease-std) infinite; }
 @keyframes skel { to { background-position: -200% 0; } }
-
-/* ============ reduced motion ============ */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .nowmark, .lprog > i, .wprog .val { transition: none !important; }
-}
-:root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-}
 
 /* ============ forced colors (Windows High Contrast) ============ */
 @media (forced-colors: active) {

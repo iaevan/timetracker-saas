@@ -12,7 +12,6 @@ import type { Routine } from "@/lib/types";
 export function BrandDot() {
   const [i, setI] = useState(0);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => setI((k) => (k + 1) % COLORS.length), 2600);
     return () => clearInterval(t);
   }, []);

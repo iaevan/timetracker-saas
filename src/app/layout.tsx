@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 };
 
 /**
- * Applies saved display preferences (theme/contrast/text size/motion)
+ * Applies saved display preferences (theme/contrast/text size)
  * before first paint to avoid flashes.
  */
 const themeScript = `(function(){try{
@@ -36,7 +36,6 @@ if(theme==="system"){theme=window.matchMedia("(prefers-color-scheme: light)").ma
 d.setAttribute("data-theme",theme);
 if(p.contrast==="high")d.setAttribute("data-contrast","high");
 if(p.text&&p.text!=="normal")d.setAttribute("data-text",p.text);
-if(p.motion==="reduced")d.setAttribute("data-motion","reduced");
 }catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
